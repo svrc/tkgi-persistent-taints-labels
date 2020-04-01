@@ -1,0 +1,9 @@
+#!/bin/sh
+
+NODE_IP=$(ifconfig eth0 | grep "inet" | cut -d ':' -f 2 | cut -d ' ' -f 1)
+
+while true; do
+    echo "Watching for changes on ${NODE_IP}";
+    /var/vcap/packages/kubernetes/bin/kubectl --kubeconfig /var/vcap/jobs/kubelet/config/kubeconfig get node -o json | /var/vcap/packages/jq/bin/jq -e ".items[] | select (.status.addresses[] | select (.type == \"InternalIP\"  and .address == \"${NODE_IP}\")) | if (.spec.taints != null) then {"labels": .metadata.labels, "taints": .spec.taints } else {"labels": .metadata.labels } end" > /var/vcap/store/watch-nodes-tl/labels-taints.json
+    sleep 15
+done

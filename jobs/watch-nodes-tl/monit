@@ -1,0 +1,8 @@
+
+check process watch-nodes-tl
+  with pidfile /var/vcap/sys/run/watch-nodes-tl/watch-nodes-tl.pid
+  start program "/var/vcap/jobs/watch-nodes-tl/bin/ctl start"
+  stop program "/var/vcap/jobs/watch-nodes-tl/bin/ctl stop"
+  group vcap
+
+

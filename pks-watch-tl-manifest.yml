@@ -1,0 +1,21 @@
+# Manifest documentation is here https://bosh.io/docs/runtime-config
+# This manifest installs the pks-disk-pressure-watch job 
+---
+name: pks-persistent-taints-labels
+
+releases:
+- name: pks-persistent-taints-labels
+  version: 0+dev.1
+
+addons:
+  - name: watch-nodes-tl
+    jobs:
+    - name: watch-nodes-tl
+      release: pks-persistent-taints-labels
+
+    include: 
+      jobs:
+      - name: kubelet
+        release: kubo
+      stemcell:
+      - os: ubuntu-xenial

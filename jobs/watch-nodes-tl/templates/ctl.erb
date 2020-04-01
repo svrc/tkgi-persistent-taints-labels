@@ -1,0 +1,41 @@
+#!/bin/bash
+# vim: set ft=sh
+
+set -e
+
+RUN_DIR=/var/vcap/sys/run/watch-nodes-tl
+LOG_DIR=/var/vcap/sys/log/watch-nodes-tl
+STORE_DIR=/var/vcap/store/watch-nodes-tl
+PIDFILE=$RUN_DIR/watch-nodes-tl.pid
+
+case $1 in
+
+  start)
+    mkdir -p $RUN_DIR
+    mkdir -p $STORE_DIR
+    chown -R vcap:vcap $RUN_DIR
+
+    mkdir -p $LOG_DIR
+    chown -R root:root $LOG_DIR
+
+    echo $$ > $PIDFILE
+
+    exec /var/vcap/jobs/watch-nodes-tl/bin/watcher.sh \
+      1>>$LOG_DIR/watch-nodes-tl.stdout.log \
+      2>>$LOG_DIR/watch-nodes-tl.stderr.log
+
+    ;;
+
+  stop)
+    if [ -f $PIDFILE ]; then
+      kill -9 `cat $PIDFILE` || true
+      rm -f $PIDFILE
+    fi
+    ;;
+
+  *)
+    echo "Usage: $0 {start|stop}"
+
+    ;;
+
+esac
