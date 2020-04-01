@@ -1,29 +1,8 @@
 #!/bin/sh
 
-# Ensure the kubelet is up on this node before relabelling and re-tainting
-/var/vcap/jobs/kubelet/bin/ensure_kubelet_up_and_running
+if [ ! -f "/var/vcap/store/watch-nodes-tl/labels-taints.json" ]; then
+  exit 0
+fi
 
-# Different clouds use different standards for node names, therefore the IP is the most
-# reliable way to map our current IP to the current node name
-
-NODE_IP=$(ifconfig eth0 | grep "inet" | cut -d ':' -f 2 | cut -d ' ' -f 1)
-NODE_NAME=$(/var/vcap/packages/kubernetes/bin/kubectl --kubeconfig /var/vcap/jobs/kubelet/config/kubeconfig get node -o json | /var/vcap/packages/jq/bin/jq -r ".items[] | select (.status.addresses[] | select (.type == \"InternalIP\"  and .address == \"${NODE_IP}\")) | .metadata.name")
-
-# Grab all the saved labels, and remove any whitelisted labels that are set by the PKS system
-
-LABELS=$(/var/vcap/packages/jq/bin/jq -r '.labels | del(."beta.kubernetes.io\/arch"?) | del(."bosh.id"?) | del(."bosh.zone"?) | del(."failure-domain.beta.kubernetes.io\/zone"?) | del(."kubernetes.io\/arch"?) | del(."kubernetes.io\/hostname"?) | del(."kubernetes.io\/os"?) | del(."beta.kubernetes.io\/os"?) | del(."pks-system\/cluster.name"?) | del(."pks-system/cluster.uuid"?) | del(."spec.ip"?) | to_entries | .[] | .key + "=" + .value ' /var/vcap/store/watch-nodes-tl/labels-taints.json)
-
-# Relabel any remaining saved labels on the current node
-
-for label in $LABELS; do
-  echo "Labeling $NODE_NAME with $label"
-  /var/vcap/packages/kubernetes/bin/kubectl --kubeconfig /var/vcap/jobs/kubelet/config/kubeconfig  label node $NODE_NAME "$label"
-done
-
-TAINTS=$(/var/vcap/packages/jq/bin/jq -r '.taints | to_entries | .[].value | .key + "=" + .value + ":" + .effect' /var/vcap/store/watch-nodes-tl/labels-taints.json)
-for taint in $TAINTS; do
-  echo "Tainting $NODE_NAME with $taint"
-  /var/vcap/packages/kubernetes/bin/kubectl --kubeconfig /var/vcap/jobs/kubelet/config/kubeconfig taint node $NODE_NAME "$taint"
-done
-
-  
+mkdir -p /var/vcap/store/watch-nodes-tl
+touch /var/vcap/store/watch-nodes-tl/REFRESH
