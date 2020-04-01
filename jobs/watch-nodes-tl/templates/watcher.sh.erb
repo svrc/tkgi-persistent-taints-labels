@@ -2,10 +2,10 @@
 
 NODE_IP=$(ifconfig eth0 | grep "inet" | cut -d ':' -f 2 | cut -d ' ' -f 1)
 
-if [  -f "/var/vcap/store/watch-nodes-tl/REFRESH" ]; then
+# Ensure the kubelet is up on this node before relabelling and re-tainting
+/var/vcap/jobs/kubelet/bin/ensure_kubelet_up_and_running
 
-  # Ensure the kubelet is up on this node before relabelling and re-tainting
-  /var/vcap/jobs/kubelet/bin/ensure_kubelet_up_and_running
+if [  -f "/var/vcap/store/watch-nodes-tl/REFRESH" ]; then
 
   # Different clouds use different standards for node names, therefore the IP is the most
   # reliable way to map our current IP to the current node name
