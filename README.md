@@ -1,8 +1,8 @@
-# PKS persistent labeller and tainter
+# Tanzu Kubernetes Grid Integrated (TKGI) / PKS  persistent labeller and tainter
 
 ## What does this do?
 
-PKS destroys and creates new nodes whenever there is an OS or Kubernetes upgrade, or a node failure.  Node IDs thus will change at VM recreate, remediate or upgrade time. 
+TKGI/PKS destroys and creates new nodes whenever there is an OS or Kubernetes upgrade, or a node failure.  Node IDs thus will change at VM recreate, remediate or upgrade time. 
 
 This script ensures any Taints or Labels added to that node are preserved between recreations.  
 
