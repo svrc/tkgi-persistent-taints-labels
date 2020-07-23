@@ -4,7 +4,7 @@
 /var/vcap/jobs/kubelet/bin/ensure_kubelet_up_and_running
 
 # The bosh.id label is the VM guid and is persistent across recreates 
-NODE_NAME=$(/var/vcap/packages/kubernetes/bin/kubectl --kubeconfig /var/vcap/jobs/kubelet/config/kubeconfig get node -l bosh.id=<%= spec.id %> | awk '{print $1}')
+NODE_NAME=$(/var/vcap/packages/kubernetes/bin/kubectl --kubeconfig /var/vcap/jobs/kubelet/config/kubeconfig get node -l bosh.id=<%= spec.id %> | sed 1d | awk '{print $1}')
 
 if [  -f "/var/vcap/store/watch-nodes-tl/REFRESH" ]; then
 
