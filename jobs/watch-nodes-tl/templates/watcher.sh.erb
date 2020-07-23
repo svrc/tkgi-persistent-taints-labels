@@ -10,7 +10,7 @@ if [  -f "/var/vcap/store/watch-nodes-tl/REFRESH" ]; then
 echo "Refreshing node taints and labels"
 
   # Different clouds use different standards for node names, therefore the IP is the most
-  # reliable way to map our current IP to the current node name
+  # reliable way to map our current IP to the current node name.   TODO: the bosh.id label would probably be better 
 
   NODE_NAME=$(/var/vcap/packages/kubernetes/bin/kubectl --kubeconfig /var/vcap/jobs/kubelet/config/kubeconfig get node -o json | /var/vcap/packages/jq/bin/jq -r ".items[] | select (.status.addresses[] | select (.type == \"InternalIP\"  and .address == \"${NODE_IP}\")) | .metadata.name")
 
