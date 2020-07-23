@@ -22,7 +22,7 @@ export BOSH_CLIENT=ops_manager BOSH_CLIENT_SECRET=fakesecret BOSH_CA_CERT=/var/t
 ```
 git clone https://github.com/svrc-pivotal/tkgi-persistent-taints-labels && cd tkgi-persistent-taints-labels
 bosh create-release
-bosh upload-release ./dev_releases/tkgi-persistent-taints-labels/tkgi-persistent-taints-labels-0+dev.1.yml 
+bosh upload-release ./dev_releases/pks-persistent-taints-labels/pks-persistent-taints-labels-0+dev.1.yml 
 
 ```
 4. Configure the addon from this repo
