@@ -1,17 +1,15 @@
 #!/bin/sh
 
-NODE_IP=$(ifconfig eth0 | grep "inet" | cut -d ':' -f 2 | cut -d ' ' -f 1)
-
 # Ensure the kubelet is up on this node before relabelling and re-tainting
 /var/vcap/jobs/kubelet/bin/ensure_kubelet_up_and_running
+
+# The bosh.id label is the VM guid and is persistent across recreates 
+NODE_NAME=$(/var/vcap/packages/kubernetes/bin/kubectl --kubeconfig /var/vcap/jobs/kubelet/config/kubeconfig get node -l bosh.id=<%= spec.id %> | awk '{print $1}')
 
 if [  -f "/var/vcap/store/watch-nodes-tl/REFRESH" ]; then
 
 echo "Refreshing node taints and labels"
-
-  # The bosh.id label is the VM guid and is persistent across recreates 
-  NODE_NAME=$(/var/vcap/packages/kubernetes/bin/kubectl --kubeconfig /var/vcap/jobs/kubelet/config/kubeconfig get node -l bosh.id=<%= spec.id %> | awk '{print $1}')
-
+ 
   # Grab all the saved labels, and remove any whitelisted labels that are set by the PKS system
 
   LABELS=$(/var/vcap/packages/jq/bin/jq -r '.labels | del(."beta.kubernetes.io\/arch"?) | del(."bosh.id"?) | del(."bosh.zone"?) | del(."failure-domain.beta.kubernetes.io\/zone"?) | del(."kubernetes.io\/arch"?) | del(."kubernetes.io\/hostname"?) | del(."kubernetes.io\/os"?) | del(."beta.kubernetes.io\/os"?) | del(."pks-system\/cluster.name"?) | del(."pks-system/cluster.uuid"?) | del(."spec.ip"?) | to_entries | .[] | .key + "=" + .value ' /var/vcap/store/watch-nodes-tl/labels-taints.json)
@@ -32,7 +30,7 @@ echo "Refreshing node taints and labels"
   rm -f /var/vcap/store/watch-nodes-tl/REFRESH
 fi
 
-echo "Watching for changes on ${NODE_IP}";
+echo "Watching for changes on BOSH job id <%= spec.id %> , Kubernetes node name $NODE_NAME";
 while true; do
     /var/vcap/packages/kubernetes/bin/kubectl --kubeconfig /var/vcap/jobs/kubelet/config/kubeconfig get node -l bosh.id=<%= spec.id %> -o json | /var/vcap/packages/jq/bin/jq -e ".items[] | if (.spec.taints != null) then {"labels": .metadata.labels, "taints": .spec.taints } else {"labels": .metadata.labels } end" > /var/vcap/store/watch-nodes-tl/labels-taints.json
     sleep 15
