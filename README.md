@@ -4,7 +4,7 @@
 
 TKGI/PKS destroys and creates new nodes whenever there is an OS or Kubernetes upgrade, or a node failure.  Node IDs thus will change at VM recreate, remediate or upgrade time. 
 
-This script ensures any Taints or Labels added to that node are preserved between recreations.  BOSH treats the ordinal index of a VM replica, such as a worker node (0, 1, 2, etc.) as the persistent identity of that node, similar to a StatefulSet.  
+This script ensures any Taints or Labels added to that node are preserved between recreations.  BOSH records a GUID of each VM replica, and also remembers its ordinal index, such as a worker node (0, 1, 2, etc.), as the persistent identity of that node, for re-attaching its persistent volume(s) consistently.  This is similar to a StatefulSet.  
 
 Note:  There is an up to 15 second delay before these are persisted.   Also, scaling down the cluster will permanently remove nodes from the deployment (and thus their persistent disk that remembers any labels or taints).
 
