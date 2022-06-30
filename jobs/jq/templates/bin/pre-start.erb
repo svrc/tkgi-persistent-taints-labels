@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -e -x
+
+echo "Installing jq"
+pushd /var/vcap/packages/jq
+  chmod +x ./jq
+  cp ./jq /usr/local/bin
+popd
+
+echo "Installed jq"
+exit 0

@@ -12,6 +12,8 @@ addons:
     jobs:
     - name: watch-nodes-tl
       release: pks-persistent-taints-labels
+    - name: jq
+      release: pks-persistent-taints-labels
 
     include: 
       jobs:
@@ -19,3 +21,5 @@ addons:
         release: kubo
       stemcell:
       - os: ubuntu-xenial
+      - os: ubuntu-bionic
+      - os: ubuntu-jammy

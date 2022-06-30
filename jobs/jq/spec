@@ -1,0 +1,10 @@
+---
+name: jq
+
+templates:
+  bin/pre-start.erb: bin/pre-start 
+
+packages:
+- jq
+
+properties: {}
