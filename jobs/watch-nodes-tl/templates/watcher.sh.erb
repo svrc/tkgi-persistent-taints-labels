@@ -12,7 +12,7 @@ echo "Refreshing node taints and labels"
  
   # Grab all the saved labels, and remove any whitelisted labels that are set by the PKS system
 
-  LABELS=$(/var/vcap/packages/jq/bin/jq -r '.labels | del(."beta.kubernetes.io\/arch"?) | del(."bosh.id"?) | del(."bosh.zone"?) | del(."failure-domain.beta.kubernetes.io\/zone"?) | del(."kubernetes.io\/arch"?) | del(."kubernetes.io\/hostname"?) | del(."kubernetes.io\/os"?) | del(."beta.kubernetes.io\/os"?) | del(."pks-system\/cluster.name"?) | del(."pks-system/cluster.uuid"?) | del(."spec.ip"?) | to_entries | .[] | .key + "=" + .value ' /var/vcap/store/watch-nodes-tl/labels-taints.json)
+  LABELS=$(/var/vcap/packages/jq/bin/jq -r '.labels | del(."beta.kubernetes.io\/arch"?) | del(."bosh.id"?) | del(."bosh.zone"?) | del(."failure-domain.beta.kubernetes.io\/zone"?) | del(."kubernetes.io\/arch"?) | del(."kubernetes.io\/hostname"?) | del(."kubernetes.io\/os"?) | del(."beta.kubernetes.io\/os"?) | del(."topology.kubernetes.io\/zone"?) | del(."pks-system\/cluster.name"?) | del(."pks-system/cluster.uuid"?) | del(."spec.ip"?) | to_entries | .[] | .key + "=" + .value ' /var/vcap/store/watch-nodes-tl/labels-taints.json)
 
   # Relabel any remaining saved labels on the current node
 
@@ -32,6 +32,12 @@ fi
 
 echo "Watching for changes on BOSH job id <%= spec.id %> , Kubernetes node name $NODE_NAME";
 while true; do
-    /var/vcap/packages/kubernetes/bin/kubectl --kubeconfig /var/vcap/jobs/kubelet/config/kubeconfig get node -l bosh.id=<%= spec.id %> -o json | /var/vcap/packages/jq/bin/jq -e ".items[] | if (.spec.taints != null) then {"labels": .metadata.labels, "taints": .spec.taints } else {"labels": .metadata.labels } end" > /var/vcap/store/watch-nodes-tl/labels-taints.json
+     LABELS_TAINTS=$(/var/vcap/packages/kubernetes/bin/kubectl --kubeconfig /var/vcap/jobs/kubelet/config/kubeconfig get node -l bosh.id=<%= spec.id %> -o json | /var/vcap/packages/jq/bin/jq -e ".items[] | if (.spec.taints != null) then {"labels": .metadata.labels, "taints": .spec.taints } else {"labels": .metadata.labels } end")
+     if [ "$LABELS_TAINTS" ]; then 
+        echo $LABELS_TAINTS > /var/vcap/store/watch-nodes-tl/labels-taints.json
+     else
+        echo "Skipping empty kubectl response"
+     fi
+
     sleep 15
 done
